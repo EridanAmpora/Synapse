@@ -54,6 +54,24 @@ namespace SetaGames.Synapse.Networking {
                 Environment.Exit(0);
             }
 
+            //Ensure a channel handler is set
+            if (pipelineFactory.getPipeline().getHandler() == null) {
+                Logger.Severe("Invalid channel handler specified!");
+                Environment.Exit(0);
+            }
+
+            //Ensure an encoder is set
+            if (pipelineFactory.getPipeline().getEncoder() == null) {
+                Logger.Severe("Invalid encoder specified!");
+                Environment.Exit(0);
+            }
+
+            //Ensure a decoder is set
+            if (pipelineFactory.getPipeline().getDecoder() == null) {
+                Logger.Severe("Invalid decoder specified!");
+                Environment.Exit(0);
+            }
+
             this.pipelineFactory = pipelineFactory;
             this.maxConnections = maxConnections;
         }

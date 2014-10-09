@@ -55,6 +55,11 @@ namespace SetaGames.Synapse.Networking.Pipeline.Channel {
         /// </param>
         public void write(Object message) {
 
+            //Ensure the message is not null
+            if (message == null) {
+                return;
+            }
+
             //Encode the message
             Object packet = pipeline.getEncoder().encode(this, message);
 
@@ -62,7 +67,15 @@ namespace SetaGames.Synapse.Networking.Pipeline.Channel {
             byte[] payload = (byte[]) packet;
 
             //Write the bytes
-            stream.WriteAsync(payload, 0, payload.Length);
+            stream.Write(payload, 0, payload.Length);
+
+        }
+
+        /// <summary>
+        /// Disconnects the channel session
+        /// </summary>
+        public void disconnect() {
+            socket.Disconnect(false);
         }
 
         /// <summary>

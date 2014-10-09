@@ -97,8 +97,8 @@ namespace SetaGames.Synapse.Worker {
                     connectedChannels.ForEach(channel => {
 
                             if (channel.getSocket().Poll(1000, SelectMode.SelectRead)) {
-                                channel.getPipeline().getHandler().connectionTerminated(channel);
-                                toRemove.Add(channel);
+                               channel.getPipeline().getHandler().connectionTerminated(channel);
+                               toRemove.Add(channel);
                             }
                         
                     });
@@ -147,7 +147,7 @@ namespace SetaGames.Synapse.Worker {
             Packet packet = new Packet();
 
             //Begin receiving to the packet payload
-            socket.BeginReceive(packet.getPayload(), 0, packet.getPayload().Length, 0, new AsyncCallback(readCallback), new object[] {channel, packet});
+            channel.getSocket().BeginReceive(packet.getPayload(), 0, packet.getPayload().Length, 0, new AsyncCallback(readCallback), new object[] {channel, packet});
 
             // Start accepting another connection
             listener.BeginAccept(new AsyncCallback(connectCallback), listener);
@@ -155,19 +155,35 @@ namespace SetaGames.Synapse.Worker {
 
         private void readCallback(IAsyncResult ar) {
 
-            //The callback messages
-            object[] messages = (object[]) ar.AsyncState;
+                //The callback messages
+                object[] messages = (object[])ar.AsyncState;
 
-            //The channel
-            ConnectionChannel channel = (ConnectionChannel) messages[0];
+                //The channel
+                ConnectionChannel channel = (ConnectionChannel)messages[0];
 
-            //The packet
-            Packet packet = (Packet) messages[1];
+                //The packet
+                Packet packet = (Packet) messages[1];
 
-            //Send the packet to the channel's decoder
-            channel.getPipeline().getHandler().messageReceived(channel, channel.getPipeline().getDecoder().decode(channel, packet));
+            try {
 
+                //If we are unable to poll the channel's socket, it must be terminated
+                if (channel.getSocket().Poll(1000, SelectMode.SelectRead)) {
+                    channel.getPipeline().getHandler().connectionTerminated(channel);
+                    connectedChannels.Remove(channel);
+                    return;
+                }
 
+                //Send the packet to the channel's decoder
+                channel.getPipeline().getHandler().messageReceived(channel, channel.getPipeline().getDecoder().decode(channel, packet));
+
+                //Await another packet
+                channel.getSocket().BeginReceive(packet.getPayload(), 0, packet.getPayload().Length, 0, new AsyncCallback(readCallback), new object[] { channel, packet });
+            
+            } catch (Exception e) {
+
+                //Send the exception to the channel's handler
+                channel.getPipeline().getHandler().exceptionCaught(channel, e);
+            }
         }
 
         /// <summary>

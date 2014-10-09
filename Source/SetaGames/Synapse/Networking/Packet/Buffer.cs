@@ -118,5 +118,16 @@ namespace SetaGames.Synapse.Networking.Packet {
             long second = (long)readInt() & 0xFFFFFFFFL;
             return (first << 32) + second;
         }
+
+        /// <summary>
+        /// Reads a three-byte integer from the buffer payload
+        /// </summary>
+        /// 
+        /// <returns>
+        /// A tri-byte integer
+        /// </returns>
+        public int readTriByte() {
+            return ((readByte() & 0xFF) << 16) + ((readByte() & 0xFF) << 8) + (readByte() & 0xFF);
+        }
     }
 }

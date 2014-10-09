@@ -46,5 +46,19 @@ namespace SetaGames.Synapse.Networking.Pipeline.Handler {
         /// </param>
         public virtual void connectionTerminated(ConnectionChannel channel) {
         }
+
+        /// <summary>
+        /// Called when an exception is thrown while handling a channel
+        /// </summary>
+        /// 
+        /// <param name="channel">
+        /// The channel
+        /// </param>
+        /// 
+        /// <param name="e">
+        /// The exception
+        /// </param>
+        public virtual void exceptionCaught(ConnectionChannel channel, Exception e) {
+        }
     }
 }
